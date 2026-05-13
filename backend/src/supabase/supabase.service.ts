@@ -23,5 +23,4 @@ export class SupabaseService {
     this.client = createClient(supabaseUrl, supabaseKey);
     this.auth = this.client.auth;
   }
-
 }
