@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Plan {
+  free
+  pro
+}
+
+enum BoardRole {
+  owner
+  member
+}
+
+enum IntegrationProvider {
+  github
+  gitlab
+  jira
+  trello
+  asana
+  linear
+  notion
+}
+
+model Column {
+  id          String   @id @default(cuid())
+  name        String
+  order       Int
+  boardId     String
+  board       Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards       Card[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([id, boardId])
+}
+
+model User {
+  id          String   @id 
+  plan        Plan     @default(free)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  boards      UserOnBoards[]
+  comments    Comment[]
+  @@index([id])
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  name        String
+  columns     Column[]
+  users       UserOnBoards[]
+  labels      Label[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([id])
+}
+
+model UserOnBoards {
+  userId      String
+  boardId     String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  board       Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  role        BoardRole @default(member)
+  assignedAt  DateTime  @default(now())
+
+  @@id([userId, boardId])
+  @@index([userId, boardId])
+}
+
+model Card {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  labels      CardLabels[]
+  comments    Comment[]
+  attachments Attachment[]
+  columnId    String
+  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([id, columnId])
+}
+
+model Label {
+  id      String  @id @default(cuid())
+  name    String
+  color   String
+  boardId String
+  board   Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards   CardLabels[]
+  @@index([id, boardId])
+}
+
+model CardLabels {
+  cardId  String
+  labelId String
+  card    Card    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label   Label   @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, labelId])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  cardId    String
+  userId    String
+  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  @@index([id, cardId, userId])
+}
+
+model Attachment {
+  id        String    @id @default(cuid())
+  filename  String
+  url       String 
+  size      Int
+  cardId    String
+  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  @@index([id, cardId])
+}
+
