@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { FastifyRequest } from 'fastify';
@@ -20,7 +21,7 @@ export class ProGuard implements CanActivate {
       select: { plan: true },
     });
 
-    if (user?.plan !== 'pro') throw new UnauthorizedException('Unauthorized');
+    if (user?.plan !== 'pro') throw new ForbiddenException('Unauthorized');
     return true;
   }
 }

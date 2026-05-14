@@ -4,10 +4,11 @@ import { SupabaseService } from './supabase/supabase.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { rootConfig } from './rootConfig';
+import { BoardsModule } from './boards/boards.module';
 
 @Module({
   controllers: [],
   providers: [PrismaService, SupabaseService],
-  imports: [AuthModule, ConfigModule.forRoot(rootConfig)],
+  imports: [AuthModule, ConfigModule.forRoot(rootConfig), BoardsModule],
 })
 export class AppModule {}

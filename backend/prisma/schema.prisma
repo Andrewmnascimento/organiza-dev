@@ -27,6 +27,13 @@ enum IntegrationProvider {
   notion
 }
 
+enum IntegrationStatus {
+  active
+  inactive
+  expired
+  error
+}
+
 model Column {
   id          String   @id @default(cuid())
   name        String
@@ -47,18 +54,59 @@ model User {
   updatedAt   DateTime @updatedAt
   boards      UserOnBoards[]
   comments    Comment[]
+  integrations Integration[]
   @@index([id])
 }
 
 model Board {
-  id          String   @id @default(cuid())
-  name        String
-  columns     Column[]
-  users       UserOnBoards[]
-  labels      Label[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  columns       Column[]
+  users         UserOnBoards[]
+  labels        Label[]
+  integrations  BoardIntegration[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   @@index([id])
+}
+
+model Integration {
+  id                  String              @id @default(cuid())
+  userId              String             
+  provider            IntegrationProvider
+
+  accessToken         String
+  refreshToken        String?
+  tokenExpiresAt      DateTime?
+  scopes              String[]
+
+  providerAccountId   String
+  providerAccountUrl  String?
+
+  status              IntegrationStatus @default(active)
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  boards              BoardIntegration[]
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([userId, provider, providerAccountId])
+}
+
+model BoardIntegration {
+  id              String      @id @default(cuid())
+  boardId         String
+  integrationId   String
+  
+  // identificação do projeto/repo externo
+  externalProjectId   String  // ex: issue number no GitHub, project key no Jira
+  externalProjectName String  // nome legível pro usuário ver na UI
+  
+  lastSyncAt      DateTime?
+  board           Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  integration     Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, integrationId, externalProjectId])
 }
 
 model UserOnBoards {
@@ -74,17 +122,20 @@ model UserOnBoards {
 }
 
 model Card {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  order       Int
-  labels      CardLabels[]
-  comments    Comment[]
-  attachments Attachment[]
-  columnId    String
-  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  order           Int
+  labels          CardLabels[]
+  comments        Comment[]
+  attachments     Attachment[]
+  columnId        String
+  column          Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  sourceProvider  IntegrationProvider?
+  sourceId        String?
+  sourceUrl       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   @@index([id, columnId])
 }
 

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from './prisma.service';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('PrismaService', () => {
   let service: PrismaService;
@@ -14,5 +15,9 @@ describe('PrismaService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('should return void', async () => {
+    expect(await service.onModuleInit()).toBe(await service.$connect());
   });
 });

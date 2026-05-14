@@ -1,4 +1,4 @@
-#cd backend 
+#cd backend && pnpm run type-check
 #pnpm run test
 #pnpm run format
 #pnpm run lint && cd ../frontend
