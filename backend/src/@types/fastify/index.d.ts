@@ -1,8 +1,8 @@
-import { User } from '@supabase/supabase-js';
+import { RequestUser } from '../../auth/interfaces/request.user.interface';
 import 'fasify';
 
 declare module 'fastify' {
   interface FastifyRequest {
-    user: User;
+    user: RequestUser;
   }
 }

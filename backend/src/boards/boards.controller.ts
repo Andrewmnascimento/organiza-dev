@@ -45,7 +45,7 @@ export class BoardsController {
 
   @UseGuards(BoardsMemberGuard)
   @Delete(':boardId')
-  remove(@Param('boardId') boardId: string) {
-    return this.boardsService.remove(boardId);
+  remove(@Param('boardId') boardId: string, @Req() request: FastifyRequest) {
+    return this.boardsService.remove(boardId, request.user.id);
   }
 }

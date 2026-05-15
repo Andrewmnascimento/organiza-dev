@@ -34,43 +34,43 @@ enum IntegrationStatus {
   error
 }
 
-model Column {
+model Columns {
   id          String   @id @default(cuid())
   name        String
-  order       Int
+  order       Int       @default(0)
   boardId     String
-  board       Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  cards       Card[]
+  board       Boards    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards       Cards[]   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([id, boardId])
 }
 
-model User {
+model Users {
   id          String   @id 
   plan        Plan     @default(free)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   boards      UserOnBoards[]
-  comments    Comment[]
-  integrations Integration[]
+  comments    Comments[]
+  integrations Integrations[]
   @@index([id])
 }
 
-model Board {
+model Boards {
   id            String   @id @default(cuid())
   name          String
-  columns       Column[]
+  columns       Columns[]
   users         UserOnBoards[]
-  labels        Label[]
+  labels        Labels[]
   integrations  BoardIntegration[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   @@index([id])
 }
 
-model Integration {
+model Integrations {
   id                  String              @id @default(cuid())
   userId              String             
   provider            IntegrationProvider
@@ -84,7 +84,7 @@ model Integration {
   providerAccountUrl  String?
 
   status              IntegrationStatus @default(active)
-  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                Users              @relation(fields: [userId], references: [id], onDelete: Cascade)
   boards              BoardIntegration[]
 
   createdAt           DateTime          @default(now())
@@ -103,8 +103,8 @@ model BoardIntegration {
   externalProjectName String  // nome legível pro usuário ver na UI
   
   lastSyncAt      DateTime?
-  board           Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  integration     Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  board           Boards       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  integration     Integrations @relation(fields: [integrationId], references: [id], onDelete: Cascade)
 
   @@unique([boardId, integrationId, externalProjectId])
 }
@@ -112,8 +112,8 @@ model BoardIntegration {
 model UserOnBoards {
   userId      String
   boardId     String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  board       Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user        Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  board       Boards     @relation(fields: [boardId], references: [id], onDelete: Cascade)
   role        BoardRole @default(member)
   assignedAt  DateTime  @default(now())
 
@@ -121,16 +121,16 @@ model UserOnBoards {
   @@index([userId, boardId])
 }
 
-model Card {
+model Cards {
   id              String   @id @default(cuid())
   title           String
   description     String?
   order           Int
   labels          CardLabels[]
-  comments        Comment[]
-  attachments     Attachment[]
+  comments        Comments[]
+  attachments     Attachments[]
   columnId        String
-  column          Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  column          Columns   @relation(fields: [columnId], references: [id], onDelete: Cascade)
   sourceProvider  IntegrationProvider?
   sourceId        String?
   sourceUrl       String?
@@ -139,12 +139,12 @@ model Card {
   @@index([id, columnId])
 }
 
-model Label {
+model Labels {
   id      String  @id @default(cuid())
   name    String
   color   String
   boardId String
-  board   Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board   Boards   @relation(fields: [boardId], references: [id], onDelete: Cascade)
   cards   CardLabels[]
   @@index([id, boardId])
 }
@@ -152,31 +152,31 @@ model Label {
 model CardLabels {
   cardId  String
   labelId String
-  card    Card    @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  label   Label   @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  card    Cards    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label   Labels   @relation(fields: [labelId], references: [id], onDelete: Cascade)
 
   @@id([cardId, labelId])
 }
 
-model Comment {
+model Comments {
   id        String    @id @default(cuid())
   content   String
   cardId    String
   userId    String
-  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card      Cards      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   @@index([id, cardId, userId])
 }
 
-model Attachment {
+model Attachments {
   id        String    @id @default(cuid())
   filename  String
   url       String 
   size      Int
   cardId    String
-  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  card      Cards      @relation(fields: [cardId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
   @@index([id, cardId])
 }

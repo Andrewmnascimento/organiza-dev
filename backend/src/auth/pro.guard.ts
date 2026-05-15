@@ -16,7 +16,7 @@ export class ProGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<FastifyRequest>();
     if (!request.user) throw new UnauthorizedException('Unauthorized');
 
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.users.findUnique({
       where: { id: request.user.id },
       select: { plan: true },
     });

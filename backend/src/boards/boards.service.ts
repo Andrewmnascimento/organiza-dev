@@ -8,7 +8,7 @@ export class BoardsService {
   constructor(private prisma: PrismaService) {}
 
   create(userId: string, dto: CreateBoardDto) {
-    return this.prisma.board.create({
+    return this.prisma.boards.create({
       data: {
         name: dto.name,
         users: {
@@ -31,7 +31,7 @@ export class BoardsService {
   }
 
   async findOne(boardsId: string) {
-    const boards = await this.prisma.board.findUnique({
+    const boards = await this.prisma.boards.findUnique({
       where: { id: boardsId },
       include: {
         columns: {
@@ -50,15 +50,59 @@ export class BoardsService {
   }
 
   update(boardsId: string, dto: UpdateBoardDto) {
-    return this.prisma.board.update({
+    return this.prisma.boards.update({
       where: { id: boardsId },
       data: dto,
     });
   }
 
-  remove(boardsId: string) {
-    return this.prisma.board.delete({
-      where: { id: boardsId },
+  async remove(boardsId: string, userId: string) {
+    // find the user's role on the board
+    const membership = await this.prisma.userOnBoards.findUnique({
+      where: { userId_boardId: { userId: userId, boardId: boardsId } },
     });
+
+    if (!membership) throw new NotFoundException('User not part of board');
+
+    // If member -> simply remove the UserOnBoards relation
+    if (membership.role === 'member') {
+      await this.prisma.$transaction([
+        this.prisma.userOnBoards.delete({
+          where: { userId_boardId: { userId: userId, boardId: boardsId } },
+        }),
+      ]);
+
+      return { success: true };
+    }
+
+    // If owner -> try to find the oldest member (by assignedAt) excluding the owner
+    const oldestMember = await this.prisma.userOnBoards.findFirst({
+      where: { boardId: boardsId, role: 'member' },
+      orderBy: { assignedAt: 'asc' },
+    });
+
+    if (oldestMember) {
+      // promote oldest member to owner and delete the current owner in a single transaction
+      const result = await this.prisma.$transaction([
+        this.prisma.userOnBoards.update({
+          where: {
+            userId_boardId: { userId: oldestMember.userId, boardId: boardsId },
+          },
+          data: { role: 'owner' },
+        }),
+        this.prisma.userOnBoards.delete({
+          where: { userId_boardId: { userId: userId, boardId: boardsId } },
+        }),
+      ]);
+
+      return result;
+    }
+
+    // No other members found -> delete the board (cascades will remove related rows)
+    const deleted = await this.prisma.$transaction([
+      this.prisma.boards.delete({ where: { id: boardsId } }),
+    ]);
+
+    return deleted[0];
   }
 }

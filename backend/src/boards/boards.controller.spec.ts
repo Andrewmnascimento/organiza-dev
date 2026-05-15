@@ -29,8 +29,12 @@ describe('BoardsController', () => {
     mockBoardsService.create.mockReturnValue(dto);
 
     const result = controller.create(
-      { user: { id: 'user-id' } } as never,
-      dto as never,
+      {
+        user: {
+          id: 'user-id'
+        }
+      }
+      dto,
     );
 
     expect(mockBoardsService.create).toHaveBeenCalledWith('user-id', dto);
