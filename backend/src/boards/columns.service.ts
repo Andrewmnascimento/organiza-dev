@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
@@ -15,9 +11,10 @@ export class ColumnsService {
     const last = await this.prisma.columns.findFirst({
       where: { boardId },
       orderBy: { order: 'desc' },
+      select: { order: true },
     });
 
-    const order = last ? last.order++ : 0;
+    const order = last ? last.order + 1 : 0;
 
     return this.prisma.columns.create({
       data: {
@@ -44,40 +41,39 @@ export class ColumnsService {
     });
   }
 
-  private async assertCanManageColumn(columnId: string, userId: string) {
-    const column = await this.prisma.columns.findUnique({
-      where: { id: columnId },
-      select: { boardId: true },
-    });
-
-    if (!column) throw new NotFoundException('column not found');
-
-    const membership = await this.prisma.userOnBoards.findUnique({
+  async update(columnId: string, dto: UpdateColumnDto, userId: string) {
+    const column = await this.prisma.columns.findUniqueOrThrow({
       where: {
-        userId_boardId: {
-          userId,
-          boardId: column.boardId,
+        id: columnId,
+        board: {
+          users: {
+            some: { userId },
+          },
         },
       },
-      select: { userId: true },
     });
 
-    if (!membership) throw new ForbiddenException('Unauthorized');
-  }
+    if (!column) throw new ForbiddenException('Forbidden');
 
-  async update(columnId: string, dto: UpdateColumnDto, userId: string) {
-    await this.assertCanManageColumn(columnId, userId);
-
-    return this.prisma.columns.update({
+    return await this.prisma.columns.update({
       where: { id: columnId },
-      data: {
-        name: dto.name,
-      },
+      data: { name: dto.name },
     });
   }
 
   async remove(columnId: string, userId: string) {
-    await this.assertCanManageColumn(columnId, userId);
+    const column = await this.prisma.columns.findFirstOrThrow({
+      where: {
+        id: columnId,
+        board: {
+          users: {
+            some: { userId },
+          },
+        },
+      },
+    });
+
+    if (!column) throw new ForbiddenException('Forbidden');
 
     return this.prisma.columns.delete({
       where: { id: columnId },

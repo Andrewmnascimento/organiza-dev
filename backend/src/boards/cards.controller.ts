@@ -27,10 +27,11 @@ export class CardsController {
 
   @Post(':columnId')
   async create(
+    @Req() request: FastifyRequest,
     @Body() body: CreateCardDto,
     @Param('columnId') columnId: string,
   ) {
-    return await this.cardsService.create(body, columnId);
+    return await this.cardsService.create(body, columnId, request.user.id);
   }
 
   @Patch(':id')

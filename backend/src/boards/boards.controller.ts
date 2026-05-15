@@ -33,8 +33,8 @@ export class BoardsController {
 
   @UseGuards(BoardsMemberGuard)
   @Get(':boardId')
-  findOne(@Param('boardId') boardId: string) {
-    return this.boardsService.findOne(boardId);
+  findOne(@Req() request: FastifyRequest) {
+    return { board: request.board };
   }
 
   @UseGuards(BoardsMemberGuard)

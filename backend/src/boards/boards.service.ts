@@ -22,87 +22,67 @@ export class BoardsService {
   }
 
   findAllByUser(userId: string) {
-    return this.prisma.userOnBoards.findMany({
-      where: { userId },
-      include: {
-        board: true,
+    return this.prisma.boards.findMany({
+      where: {
+        users: { some: { userId } },
       },
     });
   }
 
-  async findOne(boardsId: string) {
-    const boards = await this.prisma.boards.findUnique({
-      where: { id: boardsId },
-      include: {
-        columns: {
-          orderBy: { order: 'asc' },
-          include: {
-            cards: {
-              orderBy: { order: 'asc' },
-            },
-          },
-        },
-      },
-    });
-
-    if (!boards) throw new NotFoundException('boards not found');
-    return boards;
-  }
-
-  update(boardsId: string, dto: UpdateBoardDto) {
+  async update(boardsId: string, dto: UpdateBoardDto) {
     return this.prisma.boards.update({
       where: { id: boardsId },
       data: dto,
     });
   }
 
-  async remove(boardsId: string, userId: string) {
+  async remove(boardId: string, userId: string) {
     // find the user's role on the board
     const membership = await this.prisma.userOnBoards.findUnique({
-      where: { userId_boardId: { userId: userId, boardId: boardsId } },
+      where: { userId_boardId: { userId, boardId } },
     });
 
-    if (!membership) throw new NotFoundException('User not part of board');
+    if (!membership) throw new NotFoundException('Not Found');
 
     // If member -> simply remove the UserOnBoards relation
     if (membership.role === 'member') {
-      await this.prisma.$transaction([
-        this.prisma.userOnBoards.delete({
-          where: { userId_boardId: { userId: userId, boardId: boardsId } },
-        }),
-      ]);
+      await this.leaveBoard(userId, boardId);
 
-      return { success: true };
+      return { success: true, action: 'left' };
     }
 
     // If owner -> try to find the oldest member (by assignedAt) excluding the owner
     const oldestMember = await this.prisma.userOnBoards.findFirst({
-      where: { boardId: boardsId, role: 'member' },
+      where: { boardId, role: 'member' },
       orderBy: { assignedAt: 'asc' },
     });
 
     if (oldestMember) {
       // promote oldest member to owner and delete the current owner in a single transaction
-      const result = await this.prisma.$transaction([
-        this.prisma.userOnBoards.update({
-          where: {
-            userId_boardId: { userId: oldestMember.userId, boardId: boardsId },
-          },
-          data: { role: 'owner' },
-        }),
-        this.prisma.userOnBoards.delete({
-          where: { userId_boardId: { userId: userId, boardId: boardsId } },
-        }),
-      ]);
+      await this.promoteToOwner(oldestMember.userId, boardId);
+      await this.leaveBoard(userId, boardId);
 
-      return result;
+      return { success: true, action: 'promoted' };
     }
 
     // No other members found -> delete the board (cascades will remove related rows)
-    const deleted = await this.prisma.$transaction([
-      this.prisma.boards.delete({ where: { id: boardsId } }),
-    ]);
+    await this.prisma.boards.delete({ where: { id: boardId } });
 
-    return deleted[0];
+    return { success: true, action: 'deleted' };
+  }
+
+  private async leaveBoard(userId: string, boardId: string) {
+    return this.prisma.userOnBoards.delete({
+      where: { userId_boardId: { userId, boardId } },
+    });
+  }
+
+  private async promoteToOwner(userId: string, boardId: string) {
+    return this.prisma.userOnBoards.update({
+      where: {
+        userId_boardId: { userId, boardId },
+      },
+      data: { role: 'owner' },
+    });
   }
 }

@@ -44,7 +44,7 @@ model Columns {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([id, boardId])
+  @@index([boardId])
 }
 
 model Users {
@@ -118,7 +118,6 @@ model UserOnBoards {
   assignedAt  DateTime  @default(now())
 
   @@id([userId, boardId])
-  @@index([userId, boardId])
 }
 
 model Cards {
@@ -136,7 +135,7 @@ model Cards {
   sourceUrl       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  @@index([id, columnId])
+  @@index([columnId])
 }
 
 model Labels {
@@ -167,7 +166,7 @@ model Comments {
   user      Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  @@index([id, cardId, userId])
+  @@index([cardId, userId])
 }
 
 model Attachments {

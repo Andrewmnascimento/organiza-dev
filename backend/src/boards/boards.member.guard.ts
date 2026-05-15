@@ -8,9 +8,10 @@ import {
 import type { FastifyRequest } from 'fastify';
 import { PrismaService } from '../prisma/prisma.service';
 
-type BoardsRequest = FastifyRequest & {
-  user?: { id: string };
-  params: { boardId: string };
+type BoardIdRequest = FastifyRequest & {
+  params: {
+    boardId: string;
+  };
 };
 
 @Injectable()
@@ -18,23 +19,26 @@ export class BoardsMemberGuard implements CanActivate {
   constructor(private prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<BoardsRequest>();
+    const request: BoardIdRequest = context
+      .switchToHttp()
+      .getRequest<BoardIdRequest>();
 
     if (!request.user) throw new UnauthorizedException('Unauthorized');
 
-    const boardsUser = await this.prisma.userOnBoards.findUnique({
+    const membership = await this.prisma.userOnBoards.findUnique({
       where: {
         userId_boardId: {
           userId: request.user.id,
           boardId: request.params.boardId,
         },
       },
-      select: {
-        userId: true,
-      },
+      include: { board: true },
     });
 
-    if (!boardsUser) throw new ForbiddenException('Unauthorized');
+    if (!membership) throw new ForbiddenException('Forbidden');
+
+    request.board = membership.board;
+    request.userRole = membership.role;
 
     return true;
   }
