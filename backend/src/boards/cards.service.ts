@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -15,31 +11,28 @@ export class CardsService {
       where: { columnId },
       orderBy: { order: 'desc' },
     });
-    const order = last ? last.order++ : 0;
+    const order = last ? last.order + 1 : 0;
     const title = data.title;
 
     return this.prisma.cards.create({ data: { title, order, columnId } });
   }
 
   private async findCardAndAssert(cardId: string, userId: string) {
-    const card = await this.prisma.cards.findUnique({
-      where: { id: cardId },
-      include: { column: true }, // eager load column to access boardId
+    const card = await this.prisma.cards.findFirst({
+      where: {
+        id: cardId,
+        column: {
+          board: {
+            users: {
+              some: { userId },
+            },
+          },
+        },
+      },
+      include: { column: true },
     });
 
     if (!card) throw new NotFoundException('card not found');
-
-    const membership = await this.prisma.userOnBoards.findUnique({
-      where: {
-        userId_boardId: {
-          userId,
-          boardId: card.column.boardId,
-        },
-      },
-      select: { userId: true },
-    });
-
-    if (!membership) throw new ForbiddenException('Unauthorized');
 
     return card;
   }
@@ -67,7 +60,11 @@ export class CardsService {
       dto.columnId !== card.column.id
     ) {
       const targetColumn = await this.prisma.columns.findUnique({
-        where: { id: dto.columnId },
+        where: {
+          id: dto.columnId,
+          boardId: card.column.boardId,
+          board: { users: { some: { userId } } },
+        },
         select: { id: true },
       });
 

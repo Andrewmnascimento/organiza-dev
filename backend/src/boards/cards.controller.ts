@@ -7,10 +7,12 @@ import {
   Body,
   Req,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { AuthGuard } from '../auth/auth.guard';
 import { CardsService } from './cards.service';
+import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 
 @UseGuards(AuthGuard)
@@ -21,6 +23,14 @@ export class CardsController {
   @Get(':id')
   findOne(@Req() request: FastifyRequest, @Param('id') id: string) {
     return this.cardsService.findOne(id, request.user.id);
+  }
+
+  @Post(':columnId')
+  async create(
+    @Body() body: CreateCardDto,
+    @Param('columnId') columnId: string,
+  ) {
+    return await this.cardsService.create(body, columnId);
   }
 
   @Patch(':id')
