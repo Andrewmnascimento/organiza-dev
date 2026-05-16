@@ -54,10 +54,6 @@ AI assistant helper hints
 - For code navigation, focus on backend/src for domain logic and prisma folder for schema and migrations.
 - When modifying Prisma schema, run `pnpm --filter backend run prisma generate` and create a migration.
 
-Other assistant config files discovered
-
-- None of the known AI-assistant config files (CLAUDE.md, AGENTS.md, CONVENTIONS.md, .windsurfrules, .cursorrules, .clinerules) were found.
-
 If you want, Copilot can also configure MCP servers relevant to this repo (for example, Playwright or other test runners). Please say which servers to add.
 
 ---

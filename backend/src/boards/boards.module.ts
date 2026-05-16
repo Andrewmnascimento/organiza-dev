@@ -5,11 +5,20 @@ import { BoardsMemberGuard } from './boards.member.guard';
 import { BoardsService } from './boards.service';
 import { ColumnsController } from './columns.controller';
 import { ColumnsService } from './columns.service';
+import { CardsController } from './cards.controller';
+import { CardsService } from './cards.service';
+import { LabelsController } from './labels.controller';
+import { LabelsService } from './labels.service';
 
 @Module({
   imports: [AuthModule],
-  controllers: [BoardsController, ColumnsController],
-  providers: [BoardsService, ColumnsService],
+  controllers: [
+    BoardsController,
+    ColumnsController,
+    CardsController,
+    LabelsController,
+  ],
+  providers: [BoardsService, ColumnsService, CardsService, LabelsService],
   exports: [BoardsMemberGuard],
 })
 export class BoardsModule {}
