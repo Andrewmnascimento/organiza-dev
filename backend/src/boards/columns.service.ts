@@ -2,10 +2,14 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ColumnsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async create(data: CreateColumnDto, boardId: string) {
     const last = await this.prisma.columns.findFirst({
@@ -16,13 +20,18 @@ export class ColumnsService {
 
     const order = last ? last.order + 1 : 0;
 
-    return this.prisma.columns.create({
+    const created = await this.prisma.columns.create({
       data: {
         name: data.name,
         boardId: boardId,
         order,
       },
     });
+    this.eventEmitter.emit('column.created', {
+      boardId: created.boardId,
+      column: created,
+    });
+    return created;
   }
 
   findAll(boardId: string) {
@@ -55,10 +64,15 @@ export class ColumnsService {
 
     if (!column) throw new ForbiddenException('Forbidden');
 
-    return await this.prisma.columns.update({
+    const updated = await this.prisma.columns.update({
       where: { id: columnId },
       data: { name: dto.name },
     });
+    this.eventEmitter.emit('column.updated', {
+      boardId: column.boardId,
+      column: updated,
+    });
+    return updated;
   }
 
   async remove(columnId: string, userId: string) {
@@ -75,8 +89,13 @@ export class ColumnsService {
 
     if (!column) throw new ForbiddenException('Forbidden');
 
-    return this.prisma.columns.delete({
+    const deleted = await this.prisma.columns.delete({
       where: { id: columnId },
     });
+    this.eventEmitter.emit('column.deleted', {
+      boardId: column.boardId,
+      column: deleted,
+    });
+    return deleted;
   }
 }

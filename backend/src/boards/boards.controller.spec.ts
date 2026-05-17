@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BoardsController } from './boards.controller';
 import type { BoardsService } from './boards.service';
+import { FastifyRequest } from 'fastify';
 
 const mockBoardsService = {
   create: vi.fn(),
@@ -31,9 +32,9 @@ describe('BoardsController', () => {
     const result = controller.create(
       {
         user: {
-          id: 'user-id'
-        }
-      }
+          id: 'user-id',
+        },
+      } as FastifyRequest,
       dto,
     );
 
@@ -53,9 +54,9 @@ describe('BoardsController', () => {
   it('findOne should forward board id to service', () => {
     mockBoardsService.findOne.mockReturnValue({});
 
-    const result = controller.findOne('board-id');
+    const result = controller.findOne({ board: {} } as FastifyRequest);
 
-    expect(mockBoardsService.findOne).toHaveBeenCalledWith('board-id');
-    expect(result).toEqual({});
+    expect(mockBoardsService.findOne).toHaveBeenCalledWith({ board: {} });
+    expect(result).toEqual({ board: {} });
   });
 });

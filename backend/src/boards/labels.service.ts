@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLabelDto } from './dto/create-label.dto';
 import { UpdateLabelDto } from './dto/update-label.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class LabelsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async create(boardId: string, dto: CreateLabelDto) {
     const board = await this.prisma.boards.findUnique({
@@ -16,7 +20,11 @@ export class LabelsService {
     if (!board) throw new NotFoundException('Not Found');
 
     const { name, color } = dto;
-    return this.prisma.labels.create({ data: { name, color, boardId } });
+    const created = await this.prisma.labels.create({
+      data: { name, color, boardId },
+    });
+    this.eventEmitter.emit('label.created', { boardId, label: created });
+    return created;
   }
 
   async findOne(labelId: string, userId: string) {
@@ -42,7 +50,15 @@ export class LabelsService {
       return this.prisma.labels.findUnique({ where: { id: labelId } });
     }
 
-    return this.prisma.labels.update({ where: { id: labelId }, data });
+    const updated = await this.prisma.labels.update({
+      where: { id: labelId },
+      data,
+    });
+    this.eventEmitter.emit('label.updated', {
+      boardId: label.boardId,
+      label: updated,
+    });
+    return updated;
   }
 
   async remove(labelId: string, userId: string) {
@@ -51,7 +67,12 @@ export class LabelsService {
     });
     if (!label) throw new NotFoundException('Not Found');
 
-    return this.prisma.labels.delete({ where: { id: labelId } });
+    const deleted = await this.prisma.labels.delete({ where: { id: labelId } });
+    this.eventEmitter.emit('label.deleted', {
+      boardId: label.boardId,
+      label: deleted,
+    });
+    return deleted;
   }
 
   async linkToCard(cardId: string, labelId: string, userId: string) {
@@ -72,7 +93,15 @@ export class LabelsService {
     if (label.boardId !== card.column.boardId)
       throw new NotFoundException('Not Found');
 
-    return this.prisma.cardLabels.create({ data: { cardId, labelId } });
+    const created = await this.prisma.cardLabels.create({
+      data: { cardId, labelId },
+    });
+    this.eventEmitter.emit('label.linked', {
+      boardId: label.boardId,
+      card,
+      label,
+    });
+    return created;
   }
 
   async unlinkFromCard(cardId: string, labelId: string, userId: string) {
@@ -92,6 +121,14 @@ export class LabelsService {
       where: {
         cardId_labelId: { cardId, labelId },
       },
+    });
+    const label = await this.prisma.labels.findUnique({
+      where: { id: labelId },
+    });
+    this.eventEmitter.emit('label.unlinked', {
+      boardId: card.column.boardId,
+      card,
+      label,
     });
     return relation;
   }

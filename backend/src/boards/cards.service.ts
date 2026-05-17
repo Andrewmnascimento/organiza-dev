@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CardsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
   async create(data: CreateCardDto, columnId: string, userId: string) {
     const column = await this.prisma.columns.findFirst({
       where: {
@@ -18,10 +22,15 @@ export class CardsService {
     const order = await this.getNextOrder(columnId);
     const title = data.title;
 
-    return this.prisma.cards.create({
+    const created = await this.prisma.cards.create({
       data: { title, order, columnId },
       include: { column: true },
     });
+    this.eventEmitter.emit('card.created', {
+      boardId: created.column.boardId,
+      card: created,
+    });
+    return created;
   }
 
   private async getNextOrder(columnId: string) {
@@ -95,15 +104,26 @@ export class CardsService {
       return this.prisma.cards.findUnique({ where: { id: cardId } });
     }
 
-    return await this.prisma.cards.update({
+    const updated = await this.prisma.cards.update({
       where: { id: cardId },
       data,
     });
+
+    this.eventEmitter.emit('card.updated', {
+      boardId: card.column.boardId,
+      card: updated,
+    });
+    return updated;
   }
 
   // DELETE /cards/:id - permanent removal
   async remove(cardId: string, userId: string) {
-    await this.findCardAndAssert(cardId, userId);
-    return await this.prisma.cards.delete({ where: { id: cardId } });
+    const card = await this.findCardAndAssert(cardId, userId);
+    const deleted = await this.prisma.cards.delete({ where: { id: cardId } });
+    this.eventEmitter.emit('card.deleted', {
+      boardId: card.column.boardId,
+      card: deleted,
+    });
+    return deleted;
   }
 }

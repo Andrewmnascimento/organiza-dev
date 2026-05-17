@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class BoardsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmmiter: EventEmitter2,
+  ) {}
 
   create(userId: string, dto: CreateBoardDto) {
     return this.prisma.boards.create({
@@ -30,10 +34,15 @@ export class BoardsService {
   }
 
   async update(boardsId: string, dto: UpdateBoardDto) {
-    return this.prisma.boards.update({
+    const update = await this.prisma.boards.update({
       where: { id: boardsId },
       data: dto,
     });
+    this.eventEmmiter.emit('board.updated', {
+      boardId: boardsId,
+      board: update,
+    });
+    return update;
   }
 
   async remove(boardId: string, userId: string) {

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaService } from './prisma/prisma.service';
 import { SupabaseService } from './supabase/supabase.service';
 import { AuthModule } from './auth/auth.module';
@@ -9,6 +10,11 @@ import { BoardsModule } from './boards/boards.module';
 @Module({
   controllers: [],
   providers: [PrismaService, SupabaseService],
-  imports: [AuthModule, ConfigModule.forRoot(rootConfig), BoardsModule],
+  imports: [
+    AuthModule,
+    ConfigModule.forRoot(rootConfig),
+    BoardsModule,
+    EventEmitterModule.forRoot(),
+  ],
 })
 export class AppModule {}
