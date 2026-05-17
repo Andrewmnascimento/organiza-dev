@@ -10,11 +10,15 @@
     "preview": "vite preview",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+    "format": "prettier --write \"src/**/*.tsx\" \"test/**/*.ts\""
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "prettier": "^3.8.3",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-router": "^7.15.1",
+    "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

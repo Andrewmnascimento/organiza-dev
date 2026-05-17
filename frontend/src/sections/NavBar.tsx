@@ -1,0 +1,19 @@
+export const NavBar = () => {
+  return (
+    <nav className='flex items-center justify-between px-8 py-4'>
+      <section className='text-xl font-medium'>OrganizaDev</section>
+      <section className='flex flex-row gap-6 text-sm font-medium'>
+        <a href='#solutions'>Solutions</a>
+        <a href='#features'>Features</a>
+        <a href='#integrations'>Integrations</a>
+        <a href='#pricing'>Pricing</a>
+      </section>
+      <section className='flex flex-row gap-4 text-sm font-medium items-center'>
+        <a>Sign In</a>
+        <a className='border-2 border-black px-4 py-2 rounded-2xl'>
+          Get Started
+        </a>
+      </section>
+    </nav>
+  );
+};
