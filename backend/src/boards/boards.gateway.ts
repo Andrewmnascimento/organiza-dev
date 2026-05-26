@@ -81,60 +81,116 @@ export class BoardsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @OnEvent('board.updated')
-  handleBoardUpdated(payload: { boardId: string; board: Boards }) {
-    this.server.to(payload.boardId).emit('board:updated', payload.board);
+  handleBoardUpdated(payload: {
+    boardId: string;
+    board: Boards;
+    userId: string;
+  }) {
+    this.server
+      .to(payload.boardId)
+      .emit('board:updated', { data: payload.board, userId: payload.userId });
   }
 
   @OnEvent('card.created')
-  handleCardCreated(payload: { boardId: string; card: Cards }) {
-    this.server.to(payload.boardId).emit('card:created', payload.card);
+  handleCardCreated(payload: { boardId: string; card: Cards; userId: string }) {
+    this.server
+      .to(payload.boardId)
+      .emit('card:created', { data: payload.card, userId: payload.userId });
   }
 
   @OnEvent('card.updated')
-  handleCardUpdated(payload: { boardId: string; card: Cards }) {
-    this.server.to(payload.boardId).emit('card:updated', payload.card);
+  handleCardUpdated(payload: { boardId: string; card: Cards; userId: string }) {
+    this.server
+      .to(payload.boardId)
+      .emit('card:updated', { data: payload.card, userId: payload.userId });
   }
 
   @OnEvent('card.deleted')
-  handleCardDeleted(payload: { boardId: string; card: Cards }) {
-    this.server.to(payload.boardId).emit('card:deleted', payload.card);
+  handleCardDeleted(payload: { boardId: string; card: Cards; userId: string }) {
+    this.server
+      .to(payload.boardId)
+      .emit('card:deleted', { data: payload.card, userId: payload.userId });
   }
 
   @OnEvent('column.created')
-  handleColumnCreated(payload: { boardId: string; column: Columns }) {
-    this.server.to(payload.boardId).emit('column:created', payload.column);
+  handleColumnCreated(payload: {
+    boardId: string;
+    column: Columns;
+    userId: string;
+  }) {
+    this.server
+      .to(payload.boardId)
+      .emit('column:created', { data: payload.column, userId: payload.userId });
   }
 
   @OnEvent('column.updated')
-  handleColumnUpdated(payload: { boardId: string; column: Columns }) {
-    this.server.to(payload.boardId).emit('column:updated', payload.column);
+  handleColumnUpdated(payload: {
+    boardId: string;
+    column: Columns;
+    userId: string;
+  }) {
+    this.server
+      .to(payload.boardId)
+      .emit('column:updated', { data: payload.column, userId: payload.userId });
   }
 
   @OnEvent('column.deleted')
-  handleColumnDeleted(payload: { boardId: string; column: Columns }) {
-    this.server.to(payload.boardId).emit('column:deleted', payload.column);
+  handleColumnDeleted(payload: {
+    boardId: string;
+    column: Columns;
+    userId: string;
+  }) {
+    this.server
+      .to(payload.boardId)
+      .emit('column:deleted', { data: payload.column, userId: payload.userId });
   }
 
   @OnEvent('label.created')
-  handleLabelCreated(payload: { boardId: string; label: Labels }) {
-    this.server.to(payload.boardId).emit('label:created', payload.label);
+  handleLabelCreated(payload: {
+    boardId: string;
+    label: Labels;
+    userId: string;
+  }) {
+    this.server
+      .to(payload.boardId)
+      .emit('label:created', { data: payload.label, userId: payload.userId });
   }
 
   @OnEvent('label.updated')
-  handleLabelUpdated(payload: { boardId: string; label: Labels }) {
-    this.server.to(payload.boardId).emit('label:updated', payload.label);
+  handleLabelUpdated(payload: {
+    boardId: string;
+    label: Labels;
+    userId: string;
+  }) {
+    this.server
+      .to(payload.boardId)
+      .emit('label:updated', { data: payload.label, userId: payload.userId });
   }
 
   @OnEvent('label.deleted')
-  handleLabelDeleted(payload: { boardId: string; label: Labels }) {
-    this.server.to(payload.boardId).emit('label:deleted', payload.label);
+  handleLabelDeleted(payload: {
+    boardId: string;
+    label: Labels;
+    userId: string;
+  }) {
+    this.server
+      .to(payload.boardId)
+      .emit('label:deleted', { data: payload.label, userId: payload.userId });
   }
 
   @OnEvent('label.linked')
-  handleLabelLinked(payload: { boardId: string; card: Cards; label: Labels }) {
+  handleLabelLinked(payload: {
+    boardId: string;
+    card: Cards;
+    label: Labels;
+    userId: string;
+  }) {
     this.server.to(payload.boardId).emit('label:linked', {
-      card: payload.card,
-      label: payload.label,
+      data: {
+        card: payload.card,
+        label: payload.label,
+      },
+      userId: payload.userId,
     });
   }
 
@@ -143,10 +199,14 @@ export class BoardsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     boardId: string;
     card: Cards;
     label: Labels;
+    userId: string;
   }) {
     this.server.to(payload.boardId).emit('label:unlinked', {
-      card: payload.card,
-      label: payload.label,
+      data: {
+        card: payload.card,
+        label: payload.label,
+      },
+      userId: payload.userId,
     });
   }
 }

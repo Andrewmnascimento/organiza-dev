@@ -33,7 +33,7 @@ export class BoardsService {
     });
   }
 
-  async update(boardsId: string, dto: UpdateBoardDto) {
+  async update(boardsId: string, dto: UpdateBoardDto, userId: string) {
     const update = await this.prisma.boards.update({
       where: { id: boardsId },
       data: dto,
@@ -41,6 +41,7 @@ export class BoardsService {
     this.eventEmmiter.emit('board.updated', {
       boardId: boardsId,
       board: update,
+      userId,
     });
     return update;
   }

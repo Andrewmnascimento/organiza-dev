@@ -9,8 +9,8 @@ export const NavBar = () => {
         <a href='#pricing'>Pricing</a>
       </section>
       <section className='flex flex-row gap-4 text-sm font-medium items-center'>
-        <a>Sign In</a>
-        <a className='border-2 border-black px-4 py-2 rounded-2xl'>
+        <a href="/login">Sign In</a>
+        <a href="/signup" className='border-2 border-black px-4 py-2 rounded-2xl'>
           Get Started
         </a>
       </section>

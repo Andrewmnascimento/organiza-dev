@@ -4,8 +4,8 @@ COPY package*.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY prisma ./prisma/
 RUN npm install -g pnpm@latest-11
 RUN pnpm install --frozen-lockfile --config.node-linker=hoisted
-COPY . .f
-RUN pnpm prisma generate
+COPY . .
+RUN npx prisma generate
 RUN pnpm run build
 RUN pnpm prune --prod
 

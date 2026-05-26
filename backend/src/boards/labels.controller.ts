@@ -26,8 +26,12 @@ export class LabelsController {
 
   @UseGuards(AuthGuard, BoardMemberGuard)
   @Post('/boards/:boardId/labels')
-  create(@Param('boardId') boardId: string, @Body() body: CreateLabelDto) {
-    return this.labelsService.create(boardId, body);
+  create(
+    @Param('boardId') boardId: string,
+    @Body() body: CreateLabelDto,
+    @Req() request: FastifyRequest,
+  ) {
+    return this.labelsService.create(boardId, body, request.user.id);
   }
 
   @UseGuards(AuthGuard)

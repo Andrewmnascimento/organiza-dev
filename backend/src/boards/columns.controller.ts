@@ -23,8 +23,12 @@ export class ColumnsController {
 
   @UseGuards(BoardsMemberGuard)
   @Post('/boards/:boardId/columns')
-  create(@Body() body: CreateColumnDto, @Param('boardId') boardId: string) {
-    return this.service.create(body, boardId);
+  create(
+    @Body() body: CreateColumnDto,
+    @Param('boardId') boardId: string,
+    @Req() request: FastifyRequest,
+  ) {
+    return this.service.create(body, boardId, request.user.id);
   }
 
   @UseGuards(BoardsMemberGuard)

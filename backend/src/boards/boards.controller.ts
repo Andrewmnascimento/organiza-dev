@@ -39,8 +39,12 @@ export class BoardsController {
 
   @UseGuards(BoardsMemberGuard)
   @Patch(':boardId')
-  update(@Param('boardId') boardId: string, @Body() dto: UpdateBoardDto) {
-    return this.boardsService.update(boardId, dto);
+  update(
+    @Param('boardId') boardId: string,
+    @Body() dto: UpdateBoardDto,
+    @Req() request: FastifyRequest,
+  ) {
+    return this.boardsService.update(boardId, dto, request.user.id);
   }
 
   @UseGuards(BoardsMemberGuard)

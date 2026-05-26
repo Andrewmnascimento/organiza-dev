@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
@@ -11,14 +11,22 @@ export class ColumnsService {
     private eventEmitter: EventEmitter2,
   ) {}
 
-  async create(data: CreateColumnDto, boardId: string) {
-    const last = await this.prisma.columns.findFirst({
-      where: { boardId },
-      orderBy: { order: 'desc' },
-      select: { order: true },
+  async create(data: CreateColumnDto, boardId: string, userId: string) {
+    const board = await this.prisma.boards.findFirstOrThrow({
+      where: {
+        id: boardId,
+        users: { some: { userId } },
+      },
+      include: {
+        columns: {
+          orderBy: { order: 'desc' },
+          take: 1,
+          select: { order: true },
+        },
+      },
     });
 
-    const order = last ? last.order + 1 : 0;
+    const order = board.columns[0] ? board.columns[0].order + 1 : 0;
 
     const created = await this.prisma.columns.create({
       data: {
@@ -27,15 +35,17 @@ export class ColumnsService {
         order,
       },
     });
+
     this.eventEmitter.emit('column.created', {
       boardId: created.boardId,
       column: created,
+      userId,
     });
     return created;
   }
 
   findAll(boardId: string) {
-    return this.prisma.boards.findUnique({
+    return this.prisma.boards.findUniqueOrThrow({
       where: { id: boardId },
       include: {
         columns: {
@@ -51,7 +61,7 @@ export class ColumnsService {
   }
 
   async update(columnId: string, dto: UpdateColumnDto, userId: string) {
-    const column = await this.prisma.columns.findUniqueOrThrow({
+    const column = await this.prisma.columns.findFirstOrThrow({
       where: {
         id: columnId,
         board: {
@@ -62,15 +72,15 @@ export class ColumnsService {
       },
     });
 
-    if (!column) throw new ForbiddenException('Forbidden');
-
     const updated = await this.prisma.columns.update({
       where: { id: columnId },
       data: { name: dto.name },
     });
+
     this.eventEmitter.emit('column.updated', {
       boardId: column.boardId,
       column: updated,
+      userId,
     });
     return updated;
   }
@@ -87,14 +97,13 @@ export class ColumnsService {
       },
     });
 
-    if (!column) throw new ForbiddenException('Forbidden');
-
     const deleted = await this.prisma.columns.delete({
       where: { id: columnId },
     });
     this.eventEmitter.emit('column.deleted', {
       boardId: column.boardId,
       column: deleted,
+      userId,
     });
     return deleted;
   }

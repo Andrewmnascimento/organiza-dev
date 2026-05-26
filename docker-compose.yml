@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: ./backend
+      target: builder
+    volumes:
+      - ./backend:/app
+      - /app/node-modules
+    ports:
+       - '3000:3000'
+  web:
+    build:
+      context: ./frontend
+      target: builder
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - '5173:80'
+    depends_on:
+      - api
+    

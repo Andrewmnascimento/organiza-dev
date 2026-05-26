@@ -19,6 +19,9 @@ export const Footer = () => {
             <a href="">Integrations</a>
             <a href="">Pricing</a>
           </div>
+          <div className="text-sm text-slate-500 mt-8">
+            &copy; {new Date().getFullYear()} OrganizaDev. All rights reserved.
+          </div>
         </div>
       </div>
     </div>

@@ -4,10 +4,13 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import './index.css';
 import App from './App.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
+import { Login } from './pages/Login.tsx';
 
 const router = createBrowserRouter([
-  { path: '/', Component: App },
-  { path: '/dashboard', Component: Dashboard },
+  { path: '/', element: <App /> },
+  { path: '/dashboard', element: <Dashboard /> },
+  { path: '/login', element: <Login page="login" />},
+  { path: '/signup', element: <Login page="signup" />},
 ]);
 
 createRoot(document.getElementById('root')!).render(

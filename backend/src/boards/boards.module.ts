@@ -9,6 +9,7 @@ import { CardsController } from './cards.controller';
 import { CardsService } from './cards.service';
 import { LabelsController } from './labels.controller';
 import { LabelsService } from './labels.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Module({
   imports: [AuthModule],
@@ -18,7 +19,14 @@ import { LabelsService } from './labels.service';
     CardsController,
     LabelsController,
   ],
-  providers: [BoardsService, ColumnsService, CardsService, LabelsService],
+  providers: [
+    BoardsService,
+    ColumnsService,
+    CardsService,
+    LabelsService,
+    BoardsMemberGuard,
+    PrismaService,
+  ],
   exports: [BoardsMemberGuard],
 })
 export class BoardsModule {}

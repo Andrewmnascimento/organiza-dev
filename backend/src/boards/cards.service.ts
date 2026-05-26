@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -11,24 +11,23 @@ export class CardsService {
     private eventEmitter: EventEmitter2,
   ) {}
   async create(data: CreateCardDto, columnId: string, userId: string) {
-    const column = await this.prisma.columns.findFirst({
+    await this.prisma.columns.findFirstOrThrow({
       where: {
         id: columnId,
         board: { users: { some: { userId } } },
       },
     });
-    if (!column) throw new NotFoundException('Not Found');
 
     const order = await this.getNextOrder(columnId);
-    const title = data.title;
 
     const created = await this.prisma.cards.create({
-      data: { title, order, columnId },
+      data: { title: data.title, order, columnId },
       include: { column: true },
     });
     this.eventEmitter.emit('card.created', {
       boardId: created.column.boardId,
       card: created,
+      userId,
     });
     return created;
   }
@@ -43,7 +42,7 @@ export class CardsService {
   }
 
   private async findCardAndAssert(cardId: string, userId: string) {
-    const card = await this.prisma.cards.findFirst({
+    return await this.prisma.cards.findFirstOrThrow({
       where: {
         id: cardId,
         column: {
@@ -56,17 +55,11 @@ export class CardsService {
       },
       include: { column: true },
     });
-
-    if (!card) throw new NotFoundException('Not Found');
-
-    return card;
   }
 
   // GET /cards/:id - returns card with its column
   async findOne(cardId: string, userId: string) {
-    const card = await this.findCardAndAssert(cardId, userId);
-    // return with full column included
-    return card;
+    return await this.findCardAndAssert(cardId, userId);
   }
 
   // PATCH /cards/:id - partial updates and optional movement
@@ -84,7 +77,7 @@ export class CardsService {
       dto.columnId !== null &&
       dto.columnId !== card.column.id
     ) {
-      const targetColumn = await this.prisma.columns.findUnique({
+      await this.prisma.columns.findUniqueOrThrow({
         where: {
           id: dto.columnId,
           boardId: card.column.boardId,
@@ -93,15 +86,13 @@ export class CardsService {
         select: { id: true },
       });
 
-      if (!targetColumn) throw new NotFoundException('Not Found');
-
       data.columnId = dto.columnId;
       data.order = await this.getNextOrder(dto.columnId);
     }
 
     if (Object.keys(data).length === 0) {
       // nothing to update — return current record
-      return this.prisma.cards.findUnique({ where: { id: cardId } });
+      return this.prisma.cards.findUniqueOrThrow({ where: { id: cardId } });
     }
 
     const updated = await this.prisma.cards.update({
@@ -112,6 +103,7 @@ export class CardsService {
     this.eventEmitter.emit('card.updated', {
       boardId: card.column.boardId,
       card: updated,
+      userId,
     });
     return updated;
   }
@@ -123,6 +115,7 @@ export class CardsService {
     this.eventEmitter.emit('card.deleted', {
       boardId: card.column.boardId,
       card: deleted,
+      userId,
     });
     return deleted;
   }
