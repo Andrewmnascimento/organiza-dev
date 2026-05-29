@@ -8,7 +8,7 @@ import { Footer } from '../sections/Footer';
 
 export const HomePage = () => {
   return (
-    <div className='bg-slate-50'>
+    <div className='bg-zinc-50'>
       <NavBar />
       <Hero />
       <Solutions />

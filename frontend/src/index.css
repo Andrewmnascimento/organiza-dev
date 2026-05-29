@@ -3,8 +3,16 @@
 
 @theme {
   --font-sans: 'Inter', sans-serif;
+
+  --color-border: var(--color-zinc-200);
+  --color-border-dark: var(--color-zinc-800);
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

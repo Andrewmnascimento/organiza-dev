@@ -10,7 +10,7 @@ export const NavBar = () => {
       </section>
       <section className='flex flex-row gap-4 text-sm font-medium items-center'>
         <a href="/login">Sign In</a>
-        <a href="/signup" className='border-2 border-black px-4 py-2 rounded-2xl'>
+        <a href="/signup" className='border border-zinc-900 bg-zinc-950 text-white hover:bg-zinc-900 px-4 py-2 rounded-lg transition-colors'>
           Get Started
         </a>
       </section>
