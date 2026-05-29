@@ -129,7 +129,7 @@ describe('LabelsService', () => {
   it('update - happy path: label updated and event emitted', async () => {
     const labelId = 'label-1';
     const userId = 'user-1';
-    const dto = { name: 'Updated', color: '#000' };
+    const dto = { name: 'Updated', color: '#000', id: 'randomid' };
     const existing = { id: labelId, boardId: 'board-1' };
 
     mockPrisma.labels.findUniqueOrThrow.mockResolvedValue(existing);
@@ -160,7 +160,7 @@ describe('LabelsService', () => {
       .mockResolvedValueOnce(existing)
       .mockResolvedValueOnce(current);
 
-    const result = await service.update(labelId, {}, userId);
+    const result = await service.update(labelId, { id: 'randomid' }, userId);
 
     expect(mockPrisma.labels.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id: labelId },
@@ -178,7 +178,7 @@ describe('LabelsService', () => {
     );
 
     await expect(
-      service.update('missing', { name: 'x' }, 'user-1'),
+      service.update('missing', { name: 'x', id: 'randomid' }, 'user-1'),
     ).rejects.toBeInstanceOf(PrismaClientKnownRequestError);
     expect(mockEventEmitter.emit).not.toHaveBeenCalled();
   });

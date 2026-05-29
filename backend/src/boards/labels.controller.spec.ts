@@ -58,7 +58,7 @@ describe('LabelsController', () => {
   });
 
   it('update should forward labelId, dto and user id to service', async () => {
-    const dto = { name: 'Updated' };
+    const dto = { name: 'Updated', id: 'randomid' };
     mockLabelsService.update.mockResolvedValue({ id: 'label-1' });
 
     const result = await controller.update('label-1', dto, {
