@@ -111,7 +111,7 @@ export class CardsService {
   }
 
   // PATCH /columns/reorder/:columnId
-  async reorder(dto: ReorderCardsDto, columnId: string,userId: string) {
+  async reorder(dto: ReorderCardsDto, columnId: string, userId: string) {
     const column = await this.prisma.columns.findFirstOrThrow({
       where: {
         id: columnId,

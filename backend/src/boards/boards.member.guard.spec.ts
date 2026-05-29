@@ -7,6 +7,7 @@ import {
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { BoardsMemberGuard } from './boards.member.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { FastifyRequest } from 'fastify';
 
 describe('boardsGuard', () => {
   let moduleRef: TestingModule;
@@ -30,7 +31,12 @@ describe('boardsGuard', () => {
   });
 
   it('happy path: should allow when user is linked to the boards', async () => {
-    mockFindUnique.mockResolvedValue({ userId: 'user-id' });
+    const board = { id: 'boards-id', name: 'Test Board' };
+    mockFindUnique.mockResolvedValue({
+      userId: 'user-id',
+      role: 'member',
+      board,
+    });
 
     const request = {
       user: { id: 'user-id' },
@@ -49,10 +55,10 @@ describe('boardsGuard', () => {
           boardId: 'boards-id',
         },
       },
-      select: {
-        userId: true,
-      },
+      include: { board: true },
     });
+    expect((request as FastifyRequest).board).toEqual(board);
+    expect((request as FastifyRequest).userRole).toBe('member');
     expect(result).toBe(true);
   });
 

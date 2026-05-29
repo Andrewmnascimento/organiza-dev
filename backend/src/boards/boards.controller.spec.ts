@@ -6,7 +6,6 @@ import { FastifyRequest } from 'fastify';
 const mockBoardsService = {
   create: vi.fn(),
   findAllByUser: vi.fn(),
-  findOne: vi.fn(),
   update: vi.fn(),
   remove: vi.fn(),
 };
@@ -51,12 +50,46 @@ describe('BoardsController', () => {
     expect(result).toEqual([]);
   });
 
-  it('findOne should forward board id to service', () => {
-    mockBoardsService.findOne.mockReturnValue({});
+  it('findOne should return the board from guard', () => {
+    const request = {
+      board: { id: 'board-1', name: 'Test' },
+    } as FastifyRequest;
+    const result = controller.findOne(request);
+    expect(result).toEqual({ board: { id: 'board-1', name: 'Test' } });
+  });
 
-    const result = controller.findOne({ board: {} } as FastifyRequest);
+  it('update should forward boardId, dto and request.user.id to service', () => {
+    mockBoardsService.update.mockResolvedValue({});
 
-    expect(mockBoardsService.findOne).toHaveBeenCalledWith({ board: {} });
-    expect(result).toEqual({ board: {} });
+    const result = controller.update('1234', { name: 'board' }, {
+      user: {
+        id: 'test',
+      },
+    } as FastifyRequest);
+
+    expect(mockBoardsService.update).toHaveBeenCalledWith(
+      '1234',
+      { name: 'board' },
+      'test',
+    );
+
+    expect(result).resolves.toEqual({});
+  });
+
+  it('delete should foward boardId and request.user.id to service', () => {
+    mockBoardsService.remove.mockResolvedValue({});
+
+    const boardId = 'id';
+    const request = {
+      user: {
+        id: 'userid',
+      },
+    } as FastifyRequest;
+
+    const result = controller.remove(boardId, request);
+
+    expect(mockBoardsService.remove).toHaveBeenCalledWith('id', 'userid');
+
+    expect(result.then()).resolves.toEqual({});
   });
 });

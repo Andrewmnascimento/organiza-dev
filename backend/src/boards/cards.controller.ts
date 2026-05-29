@@ -35,7 +35,6 @@ export class CardsController {
     return await this.cardsService.create(body, columnId, request.user.id);
   }
 
-
   @Patch('/reorder/:columnId')
   reorder(
     @Body() dto: ReorderCardsDto,

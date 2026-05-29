@@ -8,7 +8,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class BoardsService {
   constructor(
     private prisma: PrismaService,
-    private eventEmmiter: EventEmitter2,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   create(userId: string, dto: CreateBoardDto) {
@@ -38,7 +38,7 @@ export class BoardsService {
       where: { id: boardsId },
       data: dto,
     });
-    this.eventEmmiter.emit('board.updated', {
+    this.eventEmitter.emit('board.updated', {
       boardId: boardsId,
       board: update,
       userId,
