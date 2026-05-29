@@ -5,6 +5,7 @@ import type { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 const mockPrisma = {
+  $transaction: vi.fn(),
   columns: {
     findFirstOrThrow: vi.fn(),
     findUniqueOrThrow: vi.fn(),
@@ -27,9 +28,13 @@ describe('CardsService', () => {
   let service: CardsService;
 
   beforeEach(() => {
-    Object.values(mockPrisma).forEach((group) =>
-      Object.values(group).forEach((mockFn) => mockFn.mockReset()),
-    );
+    Object.values(mockPrisma).forEach((group) => {
+      if (typeof group === 'function' && 'mockReset' in group) {
+        (group as unknown as { mockReset: () => void }).mockReset();
+      } else {
+        Object.values(group).forEach((mockFn) => mockFn.mockReset());
+      }
+    });
     Object.values(mockEventEmitter).forEach((mockFn) => mockFn.mockReset());
     service = new CardsService(
       mockPrisma as unknown as PrismaService,
@@ -314,6 +319,69 @@ describe('CardsService', () => {
     await expect(
       service.remove('missing-card', 'user-1'),
     ).rejects.toBeInstanceOf(PrismaClientKnownRequestError);
+    expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+  });
+
+  // REORDER
+  it('reorder - happy path: updates cards and emits event', async () => {
+    const columnId = 'col-1';
+    const userId = 'user-1';
+    const dto = {
+      cards: [
+        { id: 'card-1', order: 2 },
+        { id: 'card-2', order: 1 },
+      ],
+    };
+
+    mockPrisma.columns.findFirstOrThrow.mockResolvedValue({
+      boardId: 'board-1',
+    });
+    mockPrisma.cards.update.mockResolvedValue({});
+    mockPrisma.$transaction.mockResolvedValue([]);
+
+    await service.reorder(dto, columnId, userId);
+
+    expect(mockPrisma.columns.findFirstOrThrow).toHaveBeenCalledWith({
+      where: {
+        id: columnId,
+        board: { users: { some: { userId } } },
+      },
+      select: { boardId: true },
+    });
+
+    expect(mockPrisma.cards.update).toHaveBeenNthCalledWith(1, {
+      where: { id: 'card-1', columnId },
+      data: { order: 2 },
+    });
+    expect(mockPrisma.cards.update).toHaveBeenNthCalledWith(2, {
+      where: { id: 'card-2', columnId },
+      data: { order: 1 },
+    });
+
+    expect(mockPrisma.$transaction).toHaveBeenCalled();
+    expect(mockEventEmitter.emit).toHaveBeenCalledWith('card.reordered', {
+      boardId: 'board-1',
+      cards: dto.cards,
+      userId,
+    });
+  });
+
+  it('reorder - column not found: throws PrismaClientKnownRequestError and does not emit or transaction', async () => {
+    const columnId = 'missing-col';
+    const userId = 'user-1';
+    const dto = { cards: [{ id: 'card-1', order: 0 }] };
+
+    mockPrisma.columns.findFirstOrThrow.mockRejectedValue(
+      new PrismaClientKnownRequestError('Not found', {
+        code: 'P2025',
+        clientVersion: '7.8.0',
+      }),
+    );
+
+    await expect(service.reorder(dto, columnId, userId)).rejects.toBeInstanceOf(
+      PrismaClientKnownRequestError,
+    );
+    expect(mockPrisma.$transaction).not.toHaveBeenCalled();
     expect(mockEventEmitter.emit).not.toHaveBeenCalled();
   });
 });
