@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ReorderColumnsDto } from './dto/reorder-columns.dto';
 
 @Injectable()
 export class ColumnsService {
@@ -83,6 +84,27 @@ export class ColumnsService {
       userId,
     });
     return updated;
+  }
+
+  async reorder(dto: ReorderColumnsDto, boardId: string, userId: string) {
+    await this.prisma.$transaction(
+      dto.columns.map((col) =>
+        this.prisma.columns.update({
+          where: {
+            id: col.id,
+            boardId,
+            board: { users: { some: { userId } } },
+          },
+          data: { order: col.order },
+        }),
+      ),
+    );
+
+    this.eventEmitter.emit('column.reordered', {
+      boardId,
+      columns: dto.columns,
+      userId,
+    });
   }
 
   async remove(columnId: string, userId: string) {

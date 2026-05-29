@@ -14,6 +14,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { CardsService } from './cards.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
+import { ReorderCardsDto } from './dto/reorder-cards.dto';
 
 @UseGuards(AuthGuard)
 @Controller('cards')
@@ -32,6 +33,16 @@ export class CardsController {
     @Param('columnId') columnId: string,
   ) {
     return await this.cardsService.create(body, columnId, request.user.id);
+  }
+
+
+  @Patch('/reorder/:columnId')
+  reorder(
+    @Body() dto: ReorderCardsDto,
+    @Req() request: FastifyRequest,
+    @Param('columnId') columnId: string,
+  ) {
+    return this.cardsService.reorder(dto, columnId, request.user.id);
   }
 
   @Patch(':id')

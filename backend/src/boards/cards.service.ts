@@ -3,6 +3,7 @@ import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ReorderCardsDto } from './dto/reorder-cards.dto';
 
 @Injectable()
 export class CardsService {
@@ -10,6 +11,7 @@ export class CardsService {
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
   ) {}
+
   async create(data: CreateCardDto, columnId: string, userId: string) {
     await this.prisma.columns.findFirstOrThrow({
       where: {
@@ -106,6 +108,35 @@ export class CardsService {
       userId,
     });
     return updated;
+  }
+
+  // PATCH /columns/reorder/:columnId
+  async reorder(dto: ReorderCardsDto, columnId: string,userId: string) {
+    const column = await this.prisma.columns.findFirstOrThrow({
+      where: {
+        id: columnId,
+        board: { users: { some: { userId } } },
+      },
+      select: { boardId: true },
+    });
+
+    await this.prisma.$transaction(
+      dto.cards.map((card) =>
+        this.prisma.cards.update({
+          where: {
+            id: card.id,
+            columnId,
+          },
+          data: { order: card.order },
+        }),
+      ),
+    );
+
+    this.eventEmitter.emit('card.reordered', {
+      boardId: column.boardId,
+      cards: dto.cards,
+      userId,
+    });
   }
 
   // DELETE /cards/:id - permanent removal

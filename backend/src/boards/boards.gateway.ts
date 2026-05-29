@@ -17,6 +17,7 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { PrismaService } from '../prisma/prisma.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Boards, Cards, Columns, Labels } from '../generated/prisma/browser';
+import { OrderItem } from './dto/order.item.dto';
 
 @WebSocketGateway({
   cors: { origin: process.env.CLIENT_URL, credentials: true },
@@ -132,6 +133,30 @@ export class BoardsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .to(payload.boardId)
       .emit('column:updated', { data: payload.column, userId: payload.userId });
+  }
+
+  @OnEvent('column.reordered')
+  handleColumnReorder(payload: {
+    boardId: string;
+    columns: OrderItem[];
+    userId: string;
+  }) {
+    this.server.to(payload.boardId).emit('column:reordered', {
+      data: payload.columns,
+      userId: payload.userId,
+    });
+  }
+
+  @OnEvent('card.reordered')
+  handleCardReorder(payload: {
+    boardId: string;
+    cards: OrderItem[];
+    userId: string;
+  }) {
+    this.server.to(payload.boardId).emit('card:reordered', {
+      data: payload.cards,
+      userId: payload.userId,
+    });
   }
 
   @OnEvent('column.deleted')
