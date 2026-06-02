@@ -4,7 +4,7 @@ Purpose: Help Copilot-based agents understand how to build, test and work in thi
 
 Build / Test / Lint commands
 
-- Root (monorepo) uses pnpm (pnpm@10+) as package manager. Use `pnpm install` at the repo root to install all packages.
+- Root (monorepo) uses pnpm (pnpm@11+) as package manager. Use `pnpm install` at the repo root to install all packages.
 - Backend (Nest + TypeScript + Prisma)
   - Install: pnpm install (in repo root)
   - Build: pnpm --filter backend run build
@@ -37,7 +37,7 @@ High-level architecture
 - Backend: NestJS (v11) application using TypeScript. Uses Prisma as ORM with a generated client at `backend/src/generated/prisma` and PostgreSQL as the datasource. Fastify adapter is included. Authentication integrations and external project syncs are modeled (Integrations, BoardIntegration). Key domain models: Users, Boards, Columns, Cards, Labels, Comments, Attachments.
 - Frontend: React + Vite TypeScript app built into a static site served by Nginx in production Dockerfile.
 - Database: PostgreSQL (Supabase values present in backend/.env). Prisma migrations live under backend/prisma/migrations.
-- Testing: Vitest configured for backend with swc plugin; jest used for e2e test script (legacy config available).
+- Testing: Vitest configured for backend with swc plugin; 
 
 Key conventions and repo-specific notes
 

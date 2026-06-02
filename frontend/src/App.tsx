@@ -1,10 +1,11 @@
-import { HomePage } from './pages/HomePage';
+import { AppRouter } from "./router";
+import { AuthBootstrap } from "./router/AuthBootstrap";
 
 function App() {
   return (
-    <div>
-      <HomePage />
-    </div>
+    <AuthBootstrap>
+      <AppRouter />
+    </AuthBootstrap>
   );
 }
 
