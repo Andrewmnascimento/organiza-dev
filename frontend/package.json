@@ -13,12 +13,17 @@
     "format": "prettier --write \"src/**/*.tsx\" \"test/**/*.ts\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/vite": "^4.3.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.17.0",
     "prettier": "^3.8.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router": "^7.15.1",
-    "tailwindcss": "^4.3.0"
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.0",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
