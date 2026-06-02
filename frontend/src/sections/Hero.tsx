@@ -8,7 +8,7 @@ export const Hero = () => {
       <h2 className='text-lg text-zinc-500 max-w-xl'>
         A PM tool for devs who want to focus on building, not on managing tools.
       </h2>
-      <a className='bg-black text-white px-6 py-3 rounded-2xl text-sm font-medium'>
+      <a className='bg-black text-white px-6 py-3 rounded-2xl text-sm font-medium' href="/signup">
         Try for free
       </a>
     </div>

@@ -27,42 +27,47 @@ export const Pricing = () => {
             <li>✓ Community support</li>
           </ul>
         </div>
-        <div className="relative flex flex-col gap-4 bg-black text-white rounded-2xl p-8 w-64">
-          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-black border border-zinc-200 text-xs font-medium px-3 py-1 rounded-full">
-              Most Popular
-          </span>
-          <div>
-            <h3 className="text-xl font-semibold">Plus</h3>
-            <p className="text-zinc-200 text-sm">For developers who need more</p>
-          </div>
-          <p className="text-4xl font-semibold">$7<span className="text-lg font-normal text-zinc-500">/mo</span></p>
-          <a className="bg-white text-black text-center text-sm py-2 rounded-xl">Get Started</a>
-          <ul className="flex flex-col gap-2 text-sm text-zinc-300">
-            <li>✓ Unlimited project boards</li>
-            <li>✓ 5 integrations per board</li>
-            <li>✓ 6 collaborators total</li>
-            <li>✓ Advanced analytics</li>
-            <li>✓ Email support</li>
-          </ul>
+        <div className="flex flex-col bg-white rounded-2xl p-8  gap-4 w-64 h-[368.5px] items-center justify-center">
+          <h3 className="text-xl font-semibold"> New Plans Comming Soon</h3>
         </div>
-        <div className="flex flex-col bg-white rounded-2xl p-8  gap-4 w-64">
-          <div>
-            <h3 className="text-xl font-semibold">
-              Pro
-            </h3>
-            <p className="text-zinc-500 text-sm">
-              For power developers
-            </p>
+        <div className="hidden">
+          <div className="relative flex flex-col gap-4 bg-black text-white rounded-2xl p-8 w-64">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-black border border-zinc-200 text-xs font-medium px-3 py-1 rounded-full">
+                Most Popular
+            </span>
+            <div>
+              <h3 className="text-xl font-semibold">Plus</h3>
+              <p className="text-zinc-200 text-sm">For developers who need more</p>
+            </div>
+            <p className="text-4xl font-semibold">$7<span className="text-lg font-normal text-zinc-500">/mo</span></p>
+            <a className="bg-white text-black text-center text-sm py-2 rounded-xl">Get Started</a>
+            <ul className="flex flex-col gap-2 text-sm text-zinc-300">
+              <li>✓ Unlimited project boards</li>
+              <li>✓ 5 integrations per board</li>
+              <li>✓ 6 collaborators total</li>
+              <li>✓ Advanced analytics</li>
+              <li>✓ Email support</li>
+            </ul>
           </div>
-          <p className="text-4xl font-semibold">$15<span className="text-lg font-normal text-zinc-500">/mo</span></p>
-          <a className="bg-black text-white text-center text-sm py-2 rounded-xl">Get Started</a>
-          <ul className="flex flex-col gap-2 text-sm text-zinc-600">
-            <li>✓ Unlimited project boards</li>
-            <li>✓ Unlimited integrations per board</li>
-            <li>✓ 20 collaborators total</li>
-            <li>✓ Advanced filters & views</li>
-            <li>✓ Priority support</li>
-          </ul>
+          <div className="flex flex-col bg-white rounded-2xl p-8  gap-4 w-64">
+            <div>
+              <h3 className="text-xl font-semibold">
+                Pro
+              </h3>
+              <p className="text-zinc-500 text-sm">
+                For power developers
+              </p>
+            </div>
+            <p className="text-4xl font-semibold">$15<span className="text-lg font-normal text-zinc-500">/mo</span></p>
+            <a className="bg-black text-white text-center text-sm py-2 rounded-xl">Get Started</a>
+            <ul className="flex flex-col gap-2 text-sm text-zinc-600">
+              <li>✓ Unlimited project boards</li>
+              <li>✓ Unlimited integrations per board</li>
+              <li>✓ 20 collaborators total</li>
+              <li>✓ Advanced filters & views</li>
+              <li>✓ Priority support</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
