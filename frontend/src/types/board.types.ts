@@ -1,4 +1,4 @@
-export interface Card {
+export interface CardProps {
   id: string;
   title: string;
   description?: string;
@@ -6,15 +6,15 @@ export interface Card {
   columnId: string;
 }
 
-export interface Column {
+export interface ColumnProps {
   id: string;
   name: string;
   order: number;
   boardId: string;
-  cards: Card[];
+  cards: CardProps[];
 }
 
-export interface Board {
+export interface BoardProps {
   id: string;
   name: string;
 }

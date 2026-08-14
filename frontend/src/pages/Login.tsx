@@ -24,7 +24,17 @@ export const Login = () => {
   }
 
   const handleGoogleLogin = async () => {
-    // to-do
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.origin}/dashboard`
+      }
+    })
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
   }
 
   return (
